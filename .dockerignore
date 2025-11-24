@@ -1,0 +1,100 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist
+dist-cjs
+build
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Temporary folders
+tmp/
+temp/
+
+# Documentation (exclude from docker image but keep in repo)
+docs/
+*.md
+!README.md
+
+# Test files
+test/
+tests/
+__tests__/
+
+# Development files
+scripts/dev/
+examples/
+
+# Cache directories
+.npm
+.eslintcache
+.stylelintcache
+
+# Build tool files
+.babelrc
+.eslintrc*
+.prettierrc*
+tsconfig.json
+jest.config.*
+
+# Git
+.git
+.gitignore
+
+# Claude Flow specific
+.swarm/
+.claude/
+claude-flow.*.log
+
+# MCP
+.mcp/
+
+# Docker files (exclude from container)
+Dockerfile*
+docker-compose*
+.dockerignore

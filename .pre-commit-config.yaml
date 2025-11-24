@@ -1,0 +1,140 @@
+# Pre-commit hooks for Claude-Flow
+# Install with: pre-commit install
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-shebang-scripts-are-executable
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.57.0
+    hooks:
+      - id: eslint
+        files: \.(js|ts|tsx)$
+        types: [file]
+        additional_dependencies:
+          - eslint@8.57.0
+          - "@typescript-eslint/eslint-plugin@6.21.0"
+          - "@typescript-eslint/parser@6.21.0"
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
+    hooks:
+      - id: prettier
+        files: \.(js|ts|tsx|json|yaml|yml|md)$
+        types_or: [javascript, jsx, ts, tsx, json, yaml]
+        additional_dependencies:
+          - prettier@3.1.1
+
+  - repo: https://github.com/awebdev/pre-commit-prettier
+    rev: v0.0.1
+    hooks:
+      - id: prettier
+        files: \.(js|ts|tsx|json|yaml|yml|md)$
+        additional_dependencies:
+          - prettier@3.1.1
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.1.0
+    hooks:
+      - id: gitlint
+        args: [--msg-filename]
+
+  - repo: https://github.com/digitalpulp/pre-commit-php
+    rev: 1.4.0
+    hooks:
+      - id: php-cs-fixer
+        files: \.(php)$
+        args: [--fix]
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: 3.5.2
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+
+  - repo: local
+    hooks:
+      - id: typescript-check
+        name: TypeScript type checking
+        entry: npm run typecheck
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+
+      - id: npm-test
+        name: Run tests
+        entry: npm test
+        language: system
+        files: \.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+      - id: npm-build
+        name: Build check
+        entry: npm run build
+        language: system
+        files: \.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+      - id: security-audit
+        name: Security audit
+        entry: npm audit --audit-level=high
+        language: system
+        files: package.json
+        pass_filenames: false
+
+# Configuration options
+default_language_version:
+  node: "20"  # Specify Node.js version for hooks
+
+# Exclude patterns
+exclude: |
+  (?x)^(
+    node_modules/|
+    dist/|
+    dist-cjs/|
+    coverage/|
+    \.git/|
+    \.vscode/|
+    \.idea/|
+    \.DS_Store
+  )$
+
+# Minimum pre-commit version
+minimum_pre_commit_version: 2.20.0
+
+# CI configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [npm-test, npm-build]
+  submodules: false

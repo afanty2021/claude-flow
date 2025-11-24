@@ -10,7 +10,7 @@
 
 ### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
-**MANDATORY PATTERNS:**
+**MANDATORY PATTERNS**:
 - **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
 - **Task tool (Claude Code)**: ALWAYS spawn ALL agents in ONE message with full instructions
 - **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
@@ -49,6 +49,156 @@
 
 This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
 
+## 📋 项目配置文件架构
+
+### 核心配置文件
+- **`package.json`** - 项目元数据、依赖管理和脚本命令
+- **`Dockerfile`** - 多阶段生产就绪镜像构建配置
+- **`docker-compose.yml`** - 容器编排配置（Redis + Nginx + Claude-Flow）
+- **`.github/workflows/`** - GitHub Actions CI/CD 管道配置
+- **`.gitignore`** - 版本控制忽略规则（包含项目特定配置）
+
+### 安全与质量配置
+- **`.audit-ci.json`** - 安全审计配置
+- **`codecov.yml`** - 代码覆盖率报告配置
+- **`.github/dependabot.yml`** - 依赖更新自动化
+- **`.pre-commit-config.yaml`** - Git 提交前检查钩子
+
+### Claude-Flow 特定配置
+- **`.claude-flow/`** - 运行时配置和数据存储
+  - `swarm-config.json` - 群体协调配置
+  - `pipeline-config.json` - 流水线配置
+  - `agents-profiles.json` - 代理角色配置
+  - `tasks/` - 任务队列和历史
+  - `sessions/` - 会话管理
+  - `models/` - AI 模型配置
+  - `metrics/` - 性能监控数据
+
+## 🚀 项目初始化流程
+
+### 环境准备
+```bash
+# 1. 克隆项目
+git clone https://github.com/ruvnet/claude-flow.git
+cd claude-flow
+
+# 2. 环境检查
+node --version  # 需要 >= 20.0.0
+npm --version   # 需要 >= 9.0.0
+
+# 3. 安装依赖
+npm install
+
+# 4. 设置开发环境
+npm run prepare  # 安装 Git hooks
+```
+
+### Docker 环境设置
+```bash
+# 开发环境
+docker-compose up -d
+
+# 生产构建
+docker build -t claude-flow .
+docker run -p 3000:3000 claude-flow
+```
+
+### MCP 服务器配置
+```bash
+# 核心服务（必需）
+claude mcp add claude-flow npx claude-flow@alpha mcp start
+
+# 增强协调（可选）
+claude mcp add ruv-swarm npx ruv-swarm mcp start
+
+# 云功能（可选，需要注册）
+claude mcp add flow-nexus npx flow-nexus@latest mcp start
+```
+
+## 🛠️ 可用脚本命令
+
+### 开发命令
+```bash
+# 开发服务器
+npm run dev
+
+# 构建项目
+npm run build
+
+# 类型检查
+npm run typecheck
+npm run typecheck:watch
+
+# 代码格式化
+npm run format
+npm run format:check
+
+# 代码检查
+npm run lint
+npm run lint:fix
+```
+
+### 测试命令
+```bash
+# 基础测试
+npm test
+npm run test:watch
+
+# 分类测试
+npm run test:unit          # 单元测试
+npm run test:integration   # 集成测试
+npm run test:e2e          # 端到端测试
+npm run test:performance  # 性能测试
+
+# 覆盖率报告
+npm run test:coverage
+npm run test:coverage:unit
+npm run test:coverage:integration
+npm run test:coverage:e2e
+
+# 综合测试（包含负载、Docker、NPX 测试）
+npm run test:comprehensive
+npm run test:comprehensive:full
+```
+
+### 安全与质量
+```bash
+# 安全审计
+npm run security:check
+npm run security:fix
+
+# 健康检查
+npm run health-check
+npm run diagnostics
+```
+
+### Docker 命令
+```bash
+# Docker 构建
+npm run docker:build
+npm run docker:run
+
+# Docker Compose
+npm run docker:dev
+npm run docker:down
+```
+
+### 发布命令
+```bash
+# 版本管理
+npm run publish:alpha
+npm run publish:major
+npm run publish:minor
+npm run publish:patch
+
+# 文档生成
+npm run docs:build
+npm run docs:serve
+
+# 变更日志
+npm run changelog
+```
+
 ## SPARC Commands
 
 ### Core Commands
@@ -62,12 +212,6 @@ This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Co
 - `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
 - `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
 
-### Build Commands
-- `npm run build` - Build project
-- `npm run test` - Run tests
-- `npm run lint` - Linting
-- `npm run typecheck` - Type checking
-
 ## SPARC Workflow Phases
 
 1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
@@ -76,6 +220,62 @@ This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Co
 4. **Refinement** - TDD implementation (`sparc tdd`)
 5. **Completion** - Integration (`sparc run integration`)
 
+## 🔧 开发工作流程
+
+### 新功能开发流程
+1. **创建功能分支**
+   ```bash
+   git checkout -b feature/new-feature
+   ```
+
+2. **运行 SPARC 规范阶段**
+   ```bash
+   npx claude-flow sparc run spec-pseudocode "实现新功能"
+   ```
+
+3. **架构设计**
+   ```bash
+   npx claude-flow sparc run architect "新功能架构设计"
+   ```
+
+4. **TDD 实现**
+   ```bash
+   npx claude-flow sparc tdd "新功能开发"
+   ```
+
+5. **集成与测试**
+   ```bash
+   npm run test:comprehensive
+   npm run lint
+   npm run typecheck
+   ```
+
+### 代理协调开发
+```javascript
+// 完整功能的代理协调示例
+[Single Message - Parallel Agent Execution]:
+  Task("产品经理", "分析用户需求并制定产品规范", "planner")
+  Task("架构师", "设计系统架构和技术选型", "system-architect")
+  Task("前端开发者", "实现 React 用户界面", "coder")
+  Task("后端开发者", "构建 REST API 和数据库", "backend-dev")
+  Task("测试工程师", "编写自动化测试套件", "tester")
+  Task("安全审查员", "进行安全审计和漏洞扫描", "reviewer")
+  Task("DevOps 工程师", "配置 CI/CD 流水线", "cicd-engineer")
+
+  TodoWrite { todos: [
+    {id: "1", content: "需求分析和产品规范", status: "in_progress", priority: "high"},
+    {id: "2", content: "系统架构设计", status: "pending", priority: "high"},
+    {id: "3", content: "数据库模型设计", status: "pending", priority: "high"},
+    {id: "4", content: "前端界面开发", status: "pending", priority: "medium"},
+    {id: "5", content: "后端 API 开发", status: "pending", priority: "medium"},
+    {id: "6", content: "单元测试编写", status: "pending", priority: "medium"},
+    {id: "7", content: "集成测试配置", status: "pending", priority: "medium"},
+    {id: "8", content: "CI/CD 流水线设置", status: "pending", priority: "low"},
+    {id: "9", content: "文档编写", status: "pending", priority: "low"},
+    {id: "10", content: "性能优化", status: "pending", priority: "low"}
+  ]}
+```
+
 ## Code Style & Best Practices
 
 - **Modular Design**: Files under 500 lines
@@ -83,6 +283,8 @@ This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Co
 - **Test-First**: Write tests before implementation
 - **Clean Architecture**: Separate concerns
 - **Documentation**: Keep updated
+- **Security**: Follow security best practices
+- **Performance**: Monitor and optimize bottlenecks
 
 ## 🚀 Available Agents (54 Total)
 
@@ -138,50 +340,112 @@ This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Co
 
 **KEY**: MCP coordinates the strategy, Claude Code's Task tool executes with real agents.
 
-## 🚀 Quick Setup
+## 🔒 安全配置与最佳实践
 
-```bash
-# Add MCP servers (Claude Flow required, others optional)
-claude mcp add claude-flow npx claude-flow@alpha mcp start
-claude mcp add ruv-swarm npx ruv-swarm mcp start  # Optional: Enhanced coordination
-claude mcp add flow-nexus npx flow-nexus@latest mcp start  # Optional: Cloud features
+### 安全审计配置
+```json
+// .audit-ci.json
+{
+  "low": true,
+  "moderate": true,
+  "high": true,
+  "critical": true,
+  "report-type": "summary",
+  "allowlist": []
+}
 ```
 
-## MCP Tool Categories
+### 依赖安全扫描
+```bash
+# 高级别安全审计
+npm audit --audit-level=high
 
-### Coordination
-`swarm_init`, `agent_spawn`, `task_orchestrate`
+# 生产依赖审计
+npm audit --production --audit-level=moderate
 
-### Monitoring
-`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
+# 许可证合规检查
+npx license-checker --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;CC0-1.0'
+```
 
-### Memory & Neural
-`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
+### Git 安全配置
+- Pre-commit hooks 代码质量检查
+- Dependabot 自动依赖更新
+- 分支保护和 PR 审查策略
 
-### GitHub Integration
-`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
+## 🐳 Docker 配置说明
 
-### System
-`benchmark_run`, `features_detect`, `swarm_monitor`
+### 多阶段构建
+- **Base Stage**: Node.js Alpine 基础镜像
+- **Deps Stage**: 依赖安装和缓存
+- **Builder Stage**: 项目构建
+- **Runner Stage**: 生产运行时环境
 
-### Flow-Nexus MCP Tools (Optional Advanced Features)
-Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
+### 服务编排
+- **claude-flow**: 主应用服务
+- **Redis**: 缓存和会话存储
+- **Nginx**: 反向代理和负载均衡
 
-**Key MCP Tool Categories:**
-- **Swarm & Agents**: `swarm_init`, `swarm_scale`, `agent_spawn`, `task_orchestrate`
-- **Sandboxes**: `sandbox_create`, `sandbox_execute`, `sandbox_upload` (cloud execution)
-- **Templates**: `template_list`, `template_deploy` (pre-built project templates)
-- **Neural AI**: `neural_train`, `neural_patterns`, `seraphina_chat` (AI assistant)
-- **GitHub**: `github_repo_analyze`, `github_pr_manage` (repository management)
-- **Real-time**: `execution_stream_subscribe`, `realtime_subscribe` (live monitoring)
-- **Storage**: `storage_upload`, `storage_list` (cloud file management)
+### 健康检查
+- 应用健康检查端点
+- Redis 连接检查
+- Nginx 状态监控
 
-**Authentication Required:**
-- Register: `mcp__flow-nexus__user_register` or `npx flow-nexus@latest register`
-- Login: `mcp__flow-nexus__user_login` or `npx flow-nexus@latest login`
-- Access 70+ specialized MCP tools for advanced orchestration
+## 🔄 CI/CD 流水线
 
-## 🚀 Agent Execution Flow with Claude Code
+### GitHub Actions 工作流
+- **Security & Code Quality**: 安全审计、代码检查、类型检查
+- **Test Suite**: 多环境测试、覆盖率报告
+- **Documentation**: 文档生成和验证
+- **Build & Package**: 项目构建和打包
+- **Deploy & Release**: 自动部署和发布管理
+
+### 分支策略
+- **main**: 生产就绪代码
+- **develop**: 开发集成分支
+- **feature/***: 功能开发分支
+- **hotfix/***: 紧急修复分支
+
+## 📊 监控与诊断
+
+### 性能监控
+```bash
+# 系统诊断
+npm run diagnostics
+
+# 健康检查
+npm run health-check
+
+# 性能基准测试
+npm run test:benchmark
+```
+
+### 监控指标
+- 代理执行性能
+- 内存使用情况
+- 任务完成率
+- 错误率和响应时间
+
+## 🌐 Flow-Nexus 云功能集成（可选）
+
+### 注册和认证
+```bash
+# 注册账户
+npx flow-nexus@latest register
+
+# 登录
+npx flow-nexus@latest login
+
+# 访问 70+ 专业 MCP 工具
+```
+
+### 云功能特性
+- **沙盒执行**: 云端代码执行环境
+- **模板库**: 预构建项目模板
+- **神经 AI**: 高级 AI 助手功能
+- **实时监控**: 实时执行流订阅
+- **云存储**: 文件管理和同步
+
+## 🎯 Agent Execution Flow with Claude Code
 
 ### The Correct Pattern:
 
@@ -201,10 +465,10 @@ Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
   Task("Test Engineer", "Write Jest tests. Check memory for API contracts.", "tester")
   Task("DevOps Engineer", "Setup Docker and CI/CD. Document in memory.", "cicd-engineer")
   Task("Security Auditor", "Review authentication. Report findings via hooks.", "reviewer")
-  
+
   // All todos batched together
   TodoWrite { todos: [...8-10 todos...] }
-  
+
   // All file operations together
   Write "backend/server.js"
   Write "frontend/App.jsx"
@@ -253,7 +517,7 @@ npx claude-flow@alpha hooks session-end --export-metrics true
   Task("Database agent", "Design and implement database schema. Store decisions in memory.", "code-analyzer")
   Task("Tester agent", "Create comprehensive test suite with 90% coverage.", "tester")
   Task("Reviewer agent", "Review code quality and security. Document findings.", "reviewer")
-  
+
   // Batch ALL todos in ONE call
   TodoWrite { todos: [
     {id: "1", content: "Research API patterns", status: "in_progress", priority: "high"},
@@ -265,7 +529,7 @@ npx claude-flow@alpha hooks session-end --export-metrics true
     {id: "7", content: "API documentation", status: "pending", priority: "low"},
     {id: "8", content: "Performance optimization", status: "pending", priority: "low"}
   ]}
-  
+
   // Parallel file operations
   Bash "mkdir -p app/{src,tests,docs,config}"
   Write "app/package.json"
@@ -333,6 +597,36 @@ Message 4: Write "file.js"
 5. Train patterns from success
 6. Enable hooks automation
 7. Use GitHub tools first
+
+## 🔧 故障排除
+
+### 常见问题
+1. **MCP 服务器连接失败**
+   - 检查网络连接
+   - 重新注册 MCP 服务器
+   - 验证 Node.js 版本兼容性
+
+2. **Docker 构建失败**
+   - 清理 Docker 缓存
+   - 检查基础镜像可用性
+   - 验证依赖安装
+
+3. **测试超时**
+   - 调整测试超时配置
+   - 检查资源使用情况
+   - 并行测试设置
+
+### 调试命令
+```bash
+# 详细日志输出
+DEBUG=claude-flow:* npx claude-flow <command>
+
+# 性能分析
+npm run test:benchmark
+
+# 系统诊断
+npm run diagnostics
+```
 
 ## Support
 
